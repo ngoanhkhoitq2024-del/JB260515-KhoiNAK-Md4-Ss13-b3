@@ -1,9 +1,11 @@
 package re.edu.identityservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import re.edu.identityservice.dto.LoginRequest;
 import re.edu.identityservice.dto.RegisterRequest;
 import re.edu.identityservice.dto.TokenResponse;
@@ -22,7 +24,6 @@ public class AuthService {
     // Xử lý đăng ký tài khoản
     @Transactional
     public UserResponse register(RegisterRequest request) {
-
         // 1. Kiểm tra dữ liệu đầu vào
         if (request.username() == null ||
                 request.username().isBlank() ||
@@ -62,7 +63,6 @@ public class AuthService {
     }
 
     public TokenResponse generateTestToken(String username) {
-
         // 1. Tìm User trong Database
         User user = userRepository.findByUsername(username);
 
@@ -78,35 +78,34 @@ public class AuthService {
         return new TokenResponse(token);
     }
 
-    public TokenResponse login(LoginRequest request) {
 
+    public TokenResponse login(LoginRequest request) {
         // 1. Tìm người dùng theo username
         User user = userRepository.findByUsername(request.username());
 
         // 2. Kiểm tra tài khoản có tồn tại không
         if (user == null) {
-            throw new RuntimeException(
-                    "Username hoặc password không chính xác"
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Bad credentials"
             );
         }
 
-        // 3. Kiểm tra mật khẩu
+        // 3. Kiểm tra mật khẩu bằng BCrypt
         boolean passwordMatches = passwordEncoder.matches(
                 request.password(),
                 user.getPassword()
         );
-
         if (!passwordMatches) {
-            throw new RuntimeException(
-                    "Username hoặc password không chính xác"
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Bad credentials"
             );
         }
-
         // 4. Tạo JWT
         String token = jwtUtil.generateToken(user);
 
         // 5. Trả token về Client
         return new TokenResponse(token);
     }
-
 }

@@ -1,3 +1,4 @@
+
 package re.edu.identityservice.controller;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
             @RequestBody RegisterRequest request) {
-
         UserResponse response = authService.register(request);
 
         return ResponseEntity
@@ -29,8 +29,8 @@ public class AuthController {
 
     @GetMapping("/test-token")
     public ResponseEntity<TokenResponse> testToken(
-            @RequestParam String username
-    ) {
+            @RequestParam String username) {
+        System.out.println(">>> DA VAO LOGIN CONTROLLER");
         TokenResponse response = authService.generateTestToken(username);
 
         return ResponseEntity.ok(response);
@@ -38,11 +38,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(
-            @RequestBody LoginRequest request
-    ) {
+            @RequestBody LoginRequest request) {
         TokenResponse response = authService.login(request);
 
         return ResponseEntity.ok(response);
     }
-
 }
